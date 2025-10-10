@@ -25,7 +25,6 @@ public class ResumeParsingService {
         if (contentType == null) {
             throw new IllegalArgumentException("Could not determine file type.");
         }
-
         if (contentType.equals("application/pdf")) {
             // Using Apache PDFBox to extract text from the PDF
             try (PDDocument document = PDDocument.load(file.getInputStream())) {
