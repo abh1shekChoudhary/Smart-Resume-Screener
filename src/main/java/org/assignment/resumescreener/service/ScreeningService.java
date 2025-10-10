@@ -21,6 +21,9 @@ public class ScreeningService {
     private JobDescriptionRepository jobDescriptionRepository;
 
     @Autowired
+    private LLMService llmService;
+
+    @Autowired
     private ResumeRepository resumeRepository;
 
     @Autowired
@@ -49,7 +52,20 @@ public class ScreeningService {
     }
 
     public ScreeningResult screenResume(Long resumeId, Long jobId) {
-        System.out.println("Placeholder for screening logic for resumeId: " + resumeId + " and jobId: " + jobId);
-        return null;
+        // 1. Fetch the resume and job description from the database
+        Resume resume = resumeRepository.findById(resumeId)
+                .orElseThrow(() -> new RuntimeException("Resume not found"));
+        JobDescription job = jobDescriptionRepository.findById(jobId)
+                .orElseThrow(() -> new RuntimeException("Job not found"));
+
+        // 2. Call the LLMService to get the score and justification
+        ScreeningResult result = llmService.scoreResume(resume.getRawText(), job.getContent());
+
+        // 3. Link the result to the resume and job
+        result.setResume(resume);
+        result.setJobDescription(job);
+
+        // 4. Save the final screening result to the database
+        return screeningResultRepository.save(result);
     }
 }
