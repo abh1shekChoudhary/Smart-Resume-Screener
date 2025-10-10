@@ -26,4 +26,6 @@ public class ScreeningResult {
 
     @Column(columnDefinition = "TEXT")
     private String extractedSkills;
+
+  
 }
