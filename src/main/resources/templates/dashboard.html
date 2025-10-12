@@ -9,110 +9,116 @@
 
 <h1>Smart Resume Screener Dashboard</h1>
 
-<div class="container">
-    <div class="card">
-        <h2>1. Create a New Job</h2>
-        <form action="/api/jobs" method="post">
-            <label for="jobTitle">Job Title:</label>
-            <input type="text" id="jobTitle" name="jobTitle" required>
-            <label for="jobContent">Job Description:</label>
-            <textarea id="jobContent" name="content" rows="4" required></textarea>
-            <button type="submit">Create Job</button>
-        </form>
-    </div>
+<div class="layout-container">
 
-    <div class="card">
-        <h2>2. Upload a New Resume</h2>
-        <form action="/api/resumes/upload" method="post" enctype="multipart/form-data">
-            <label for="candidateName">Candidate Name:</label>
-            <input type="text" id="candidateName" name="name" required>
-            <label for="resumeFile">Resume File (PDF or TXT):</label>
-            <input type="file" id="resumeFile" name="file" required>
-            <button type="submit">Upload Resume</button>
-        </form>
-    </div>
-
-    <div class="card">
-        <h2>3. Analyze Resume</h2>
-        <form id="screenForm" action="/api/screen" method="post">
-            <label for="jobSelect">Select Job:</label>
-            <select id="jobSelect" name="jobId" required>
-                <option value="">-- Select --</option>
-                <option th:each="job : ${jobs}" th:value="${job.id}" th:text="${job.jobTitle}"></option>
-            </select>
-            <label for="resumeSelect">Select Resume:</label>
-            <select id="resumeSelect" name="resumeId" required>
-                <option value="">-- Select --</option>
-                <option th:each="resume : ${resumes}" th:value="${resume.id}" th:text="${resume.candidateName}"></option>
-            </select>
-            <button type="submit">Analyze</button>
-        </form>
-    </div>
-
-    <div class="card">
-        <h2>4. View Shortlist</h2>
-        <form action="/" method="get">
-            <label for="shortlistJobSelect">View Shortlist for Job:</label>
-            <select id="shortlistJobSelect" name="jobId" onchange="this.form.submit()">
-                <option value="">-- Select a Job --</option>
-                <option th:each="job : ${jobs}" th:value="${job.id}" th:text="${job.jobTitle}" th:selected="${param.jobId != null && param.jobId[0] == job.id}"></option>
-            </select>
-        </form>
-    </div>
-</div>
-
-<div class="container">
-    <div class="card">
-        <h2>All Available Jobs</h2>
-        <table>
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>Title</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="job : ${jobs}">
-                <td th:text="${job.id}"></td>
-                <td th:text="${job.jobTitle}"></td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-    <div class="card">
-        <h2>All Uploaded Resumes</h2>
-        <table>
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>Candidate Name</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="resume : ${resumes}">
-                <td th:text="${resume.id}"></td>
-                <td th:text="${resume.candidateName}"></td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-
-<div class="container" style="grid-template-columns: 1fr;">
-    <div class="card results" th:if="${shortlist != null and not #lists.isEmpty(shortlist)}">
-        <h2>Screening Results</h2>
-        <div th:each="result : ${shortlist}">
-            <p>
-                <strong>Candidate:</strong> <span th:text="${result.resume.candidateName}"></span><br>
-                <strong>Score:</strong> <span th:text="${result.matchScore}"></span> / 10<br>
-                <strong>Extracted Skills:</strong> <span th:text="${result.extractedSkills}"></span><br>
-                <strong>Justification:</strong> <span th:text="${result.justification}"></span>
-            </p>
+    <div class="layout-column">
+        <div class="card">
+            <div class="card-header"><h2>Create New Job</h2></div>
+            <div class="card-content">
+                <form action="/api/jobs" method="post">
+                    <label for="jobTitle">Job Title:</label>
+                    <input type="text" id="jobTitle" name="jobTitle" required>
+                    <label for="jobContent">Job Description:</label>
+                    <textarea id="jobContent" name="content" rows="4" required></textarea>
+                    <button type="submit">Create Job</button>
+                </form>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h2>Upload New Resume</h2></div>
+            <div class="card-content">
+                <form action="/api/resumes/upload" method="post" enctype="multipart/form-data">
+                    <label for="candidateName">Candidate Name:</label>
+                    <input type="text" id="candidateName" name="name" required>
+                    <label for="resumeFile">Resume File (PDF or TXT):</label>
+                    <input type="file" id="resumeFile" name="file" required>
+                    <button type="submit">Upload Resume</button>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
+    <div class="layout-column">
+        <div class="card">
+            <div class="card-header"><h2>All Available Jobs</h2></div>
+            <div class="card-content">
+                <table>
+                    <thead><tr><th>ID</th><th>Title</th><th>Actions</th></tr></thead>
+                    <tbody>
+                    <tr th:each="job : ${jobs}">
+                        <td th:text="${job.id}"></td>
+                        <td th:text="${job.jobTitle}"></td>
+                        <td><button class="delete-btn delete-job-btn" th:data-id="${job.id}">×</button></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h2>All Uploaded Resumes</h2></div>
+            <div class="card-content">
+                <table>
+                    <thead><tr><th>ID</th><th>Candidate Name</th><th>Actions</th></tr></thead>
+                    <tbody>
+                    <tr th:each="resume : ${resumes}">
+                        <td th:text="${resume.id}"></td>
+                        <td th:text="${resume.candidateName}"></td>
+                        <td><button class="delete-btn delete-resume-btn" th:data-id="${resume.id}">×</button></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="layout-column">
+        <div class="card">
+            <div class="card-header"><h2>Analyze Resume</h2></div>
+            <div class="card-content">
+                <form id="screenForm" action="/api/screen" method="post">
+                    <label for="jobSelect">Select Job:</label>
+                    <select id="jobSelect" name="jobId" required>
+                        <option value="">-- Select --</option>
+                        <option th:each="job : ${jobs}" th:value="${job.id}" th:text="${job.jobTitle}"></option>
+                    </select>
+                    <label for="resumeSelect">Select Resume:</label>
+                    <select id="resumeSelect" name="resumeId" required>
+                        <option value="">-- Select --</option>
+                        <option th:each="resume : ${resumes}" th:value="${resume.id}" th:text="${resume.candidateName}"></option>
+                    </select>
+                    <button type="submit">Analyze</button>
+                </form>
+            </div>
+        </div>
+        <div class="card is-expanded">
+            <div class="card-header"><h2>Screening Results</h2></div>
+            <div class="card-content results-content">
+                <form action="/" method="get">
+                    <label for="shortlistJobSelect">View Shortlist for Job:</label>
+                    <select id="shortlistJobSelect" name="jobId" onchange="this.form.submit()">
+                        <option value="">-- Select a Job --</option>
+                        <option th:each="job : ${jobs}" th:value="${job.id}" th:text="${job.jobTitle}" th:selected="${param.jobId != null && param.jobId[0] == job.id}"></option>
+                    </select>
+                </form>
+
+                <div th:if="${shortlist != null and not #lists.isEmpty(shortlist)}">
+                    <div th:each="result : ${shortlist}">
+                        <p>
+                            <strong>Candidate:</strong> <span th:text="${result.resume.candidateName}"></span><br>
+                            <strong>Score:</strong> <span th:text="${result.matchScore}"></span> / 10<br>
+                            <strong>Extracted Skills:</strong> <span th:text="${result.extractedSkills}"></span><br>
+                            <strong>Justification:</strong> <span th:text="${result.justification}"></span>
+                        </p>
+                    </div>
+                </div>
+                <div th:if="${shortlist == null or #lists.isEmpty(shortlist)}">
+                    <p>Select a job to view the shortlist.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
 
 <script src="/js/script.js"></script>
 </body>

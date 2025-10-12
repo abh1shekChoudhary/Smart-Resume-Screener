@@ -18,7 +18,6 @@ import java.util.List;
 @RequestMapping("/api")
 public class ScreeningController {
 
-    // Inject the main ScreeningService
     @Autowired
     private ScreeningService screeningService;
 
@@ -28,16 +27,30 @@ public class ScreeningController {
         return ResponseEntity.ok(savedJob);
     }
 
+
+    @DeleteMapping("/jobs/{jobId}")
+    public ResponseEntity<Void> deleteJob(@PathVariable Long jobId) {
+        screeningService.deleteJobById(jobId);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/resumes/upload")
     public ResponseEntity<Resume> uploadResume(@RequestParam("name") String candidateName, @RequestParam("file") MultipartFile file) {
         try {
             Resume savedResume = screeningService.uploadAndParseResume(candidateName, file);
             return ResponseEntity.ok(savedResume);
         } catch (IOException | IllegalArgumentException e) {
-            // Return the specific error message to the client
             return ResponseEntity.badRequest().build();
         }
     }
+
+
+    @DeleteMapping("/resumes/{resumeId}")
+    public ResponseEntity<Void> deleteResume(@PathVariable Long resumeId) {
+        screeningService.deleteResumeById(resumeId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/jobs")
     public ResponseEntity<List<JobDescription>> getAllJobs() {
         return ResponseEntity.ok(screeningService.getAllJobs());
@@ -50,7 +63,6 @@ public class ScreeningController {
 
     @PostMapping("/screen")
     public ResponseEntity<ScreeningResult> screenResume(@RequestBody ScreenRequestDTO screenRequest) {
-        // This will return null for now, which is okay as we haven't built the LLM part yet
         ScreeningResult result = screeningService.screenResume(screenRequest.getResumeId(), screenRequest.getJobId());
         return ResponseEntity.ok(result);
     }

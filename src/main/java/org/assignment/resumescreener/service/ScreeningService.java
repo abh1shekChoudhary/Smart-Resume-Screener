@@ -48,7 +48,9 @@ public class ScreeningService {
     }
 
     public List<ScreeningResult> getShortlist(Long jobId) {
-        return screeningResultRepository.findAll();
+        return screeningResultRepository.findAll().stream()
+                .filter(result -> result.getJobDescription().getId().equals(jobId))
+                .toList();
     }
 
     public List<JobDescription> getAllJobs() {
@@ -59,21 +61,34 @@ public class ScreeningService {
         return resumeRepository.findAll();
     }
 
+
+    public void deleteJobById(Long jobId) {
+        List<ScreeningResult> relatedResults = screeningResultRepository.findAll().stream()
+                .filter(result -> result.getJobDescription() != null && result.getJobDescription().getId().equals(jobId))
+                .toList();
+        screeningResultRepository.deleteAll(relatedResults);
+        jobDescriptionRepository.deleteById(jobId);
+    }
+    public void deleteResumeById(Long resumeId) {
+        // We should also delete related screening results
+        List<ScreeningResult> relatedResults = screeningResultRepository.findAll().stream()
+                .filter(result -> result.getResume() != null && result.getResume().getId().equals(resumeId))
+                .toList();
+        screeningResultRepository.deleteAll(relatedResults);
+        resumeRepository.deleteById(resumeId);
+    }
+
     public ScreeningResult screenResume(Long resumeId, Long jobId) {
-        // 1. Fetch the resume and job description from the database
         Resume resume = resumeRepository.findById(resumeId)
                 .orElseThrow(() -> new RuntimeException("Resume not found"));
         JobDescription job = jobDescriptionRepository.findById(jobId)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
 
-        // 2. Call the LLMService to get the score and justification
         ScreeningResult result = llmService.scoreResume(resume.getRawText(), job.getContent());
 
-        // 3. Link the result to the resume and job
         result.setResume(resume);
         result.setJobDescription(job);
 
-        // 4. Save the final screening result to the database
         return screeningResultRepository.save(result);
     }
 }
