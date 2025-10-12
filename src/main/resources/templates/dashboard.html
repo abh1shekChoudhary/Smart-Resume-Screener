@@ -86,7 +86,10 @@
                         <option value="">-- Select --</option>
                         <option th:each="resume : ${resumes}" th:value="${resume.id}" th:text="${resume.candidateName}"></option>
                     </select>
-                    <button type="submit">Analyze</button>
+                    <button type="submit">
+                        <span class="loader"></span>
+                        <span class="btn-text">Analyze</span>
+                    </button>
                 </form>
             </div>
         </div>
@@ -102,13 +105,14 @@
                 </form>
 
                 <div th:if="${shortlist != null and not #lists.isEmpty(shortlist)}">
-                    <div th:each="result : ${shortlist}">
+                    <div th:each="result : ${shortlist}" class="result-item">
                         <p>
-                            <strong>Candidate:</strong> <span th:text="${result.resume.candidateName}"></span><br>
-                            <strong>Score:</strong> <span th:text="${result.matchScore}"></span> / 10<br>
-                            <strong>Extracted Skills:</strong> <span th:text="${result.extractedSkills}"></span><br>
-                            <strong>Justification:</strong> <span th:text="${result.justification}"></span>
+                            <strong>Candidate:</strong> <span class="result-candidate" th:text="${result.resume.candidateName}"></span><br>
+                            <strong>Score:</strong> <span class="result-score" th:text="${result.matchScore} + ' / 10'"></span>
                         </p>
+                        <span class="result-skills" style="display:none;" th:text="${result.extractedSkills}"></span>
+                        <span class="result-justification" style="display:none;" th:text="${result.justification}"></span>
+                        <button class="view-details-btn">View Details</button>
                     </div>
                 </div>
                 <div th:if="${shortlist == null or #lists.isEmpty(shortlist)}">
@@ -118,6 +122,11 @@
         </div>
     </div>
 
+</div>
+
+<div id="modalOverlay" class="modal-overlay">
+    <div id="modalContent" class="modal-content">
+    </div>
 </div>
 
 <script src="/js/script.js"></script>
