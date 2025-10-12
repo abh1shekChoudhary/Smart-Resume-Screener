@@ -38,6 +38,15 @@ public class ScreeningController {
             return ResponseEntity.badRequest().build();
         }
     }
+    @GetMapping("/jobs")
+    public ResponseEntity<List<JobDescription>> getAllJobs() {
+        return ResponseEntity.ok(screeningService.getAllJobs());
+    }
+
+    @GetMapping("/resumes")
+    public ResponseEntity<List<Resume>> getAllResumes() {
+        return ResponseEntity.ok(screeningService.getAllResumes());
+    }
 
     @PostMapping("/screen")
     public ResponseEntity<ScreeningResult> screenResume(@RequestBody ScreenRequestDTO screenRequest) {

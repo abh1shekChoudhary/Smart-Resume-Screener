@@ -51,6 +51,14 @@ public class ScreeningService {
         return screeningResultRepository.findAll();
     }
 
+    public List<JobDescription> getAllJobs() {
+        return jobDescriptionRepository.findAll();
+    }
+
+    public List<Resume> getAllResumes() {
+        return resumeRepository.findAll();
+    }
+
     public ScreeningResult screenResume(Long resumeId, Long jobId) {
         // 1. Fetch the resume and job description from the database
         Resume resume = resumeRepository.findById(resumeId)
