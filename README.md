@@ -51,6 +51,76 @@ The application's internal structure follows a classic **Layered Architecture**,
 - **Tools & Environment:** Git & GitHub, Postman, IntelliJ IDEA
 
 ---
+---
+
+## ⚙️ Core Workflow: The Screening Process
+
+The following flowchart illustrates the step-by-step process that occurs when a user requests a new resume screening.
+
+```mermaid
+graph TD
+    A["👤 Client (Postman/UI)"] --> B["/:api/screen Endpoint"];
+    B --> C["ScreeningService"];
+    C -- "1. Fetches Resume & JD" --> D["💾 MySQL Database"];
+    C -- "2. Calls AI Service" --> E["LLMService"];
+    E -- "3. Sends Prompt via HTTPS" --> F["🧠 Google Gemini API"];
+    F -- "4. Returns JSON Response" --> E;
+    E -- "5. Parses & Cleans Result" --> C;
+    C -- "6. Saves Result to DB" --> D;
+    B -- "7. Returns 200 OK to Client" --> A;
+
+    style A fill:#bb86fc,stroke:#333,stroke-width:2px,color:#121212
+    style F fill:#f4b400,stroke:#333,stroke-width:2px,color:#121212
+    style D fill:#4479A1,stroke:#333,stroke-width:2px,color:#fff
+```
+---
+
+---
+
+## 🎯 User-Flow
+
+This project empowers users through distinct workflows, primarily focusing on the HR Manager, with a vision for future expansion to Job Seekers.
+
+### HR Manager Workflow (Current Implementation)
+
+The core functionality of the Smart Resume Screener is designed to streamline the recruitment process for HR professionals.
+
+```mermaid
+graph TD
+    subgraph "HR Manager"
+        A[Start: Access Dashboard] -- "1. Define Open Role" --> B(Create Job);
+        B -- "2. Upload Candidates" --> C(Upload Resume);
+        C -- "3. Initiate Screening" --> D(Analyze Resume);
+        D -- "4. View Best Matches" --> E(View Shortlist for Job);
+        E -- "5. Maintain Data" --> F{Delete Job/Resume};
+    end
+
+    style A fill:#bb86fc,stroke:#333,stroke-width:2px,color:#121212
+    style B fill:#f4b400,stroke:#333,stroke-width:2px,color:#121212
+    style C fill:#f4b400,stroke:#333,stroke-width:2px,color:#121212
+    style D fill:#f4b400,stroke:#333,stroke-width:2px,color:#121212
+    style E fill:#f4b400,stroke:#333,stroke-width:2px,color:#121212
+    style F fill:#f4b400,stroke:#333,stroke-width:2px,color:#121212
+```
+### Future: Job Seeker Self-Check Workflow (Conceptual)
+Imagine extending this tool to empower job seekers. They could gain immediate insights into their resume's alignment with a desired role.
+
+```mermaid
+graph TD
+    subgraph "Job Seeker (Future Feature)"
+        G[Start: Access Public Tool] -- "1. Paste Job Description" --> H(Input JD Text);
+        H -- "2. Upload Own Resume" --> I(Upload Resume File);
+        I -- "3. Get Instant Feedback" --> J(Analyze & View Personal Score);
+        J -- "4. Refine & Improve" --> K(End: Improve Resume);
+    end
+
+    style G fill:#bb86fc,stroke:#333,stroke-width:2px,color:#121212
+    style H fill:#3f51b5,stroke:#333,stroke-width:2px,color:#fff
+    style I fill:#3f51b5,stroke:#333,stroke-width:2px,color:#fff
+    style J fill:#3f51b5,stroke:#333,stroke-width:2px,color:#fff
+    style K fill:#3f51b5,stroke:#333,stroke-width:2px,color:#fff
+```
+---
 
 ## Setup and Installation
 
@@ -121,13 +191,8 @@ Provide a detailed justification for your rating.
 
 Extract a list of the top 5-7 most relevant skills from the resume that match the job description.
 
-The resume is:
-
-{resumeText}
-
-The job description is:
-
-{jobDescriptionText}.
+The resume is: {resumeText}. 
+The job description is: {jobDescriptionText}.
 
 Return your answer as a clean JSON object with three keys: 'score' (an integer), 'justification' (a string), and 'skills' (an array of strings).
 
