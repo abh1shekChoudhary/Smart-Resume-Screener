@@ -22,27 +22,6 @@ This project demonstrates a modern, API-driven approach to solving a real-world 
 - **Interactive Web Dashboard:** Includes an optional, server-rendered frontend built with **Thymeleaf** for easy interaction with the API.
 
 ---
-
-## Architecture
-
-The application is designed with a clean, maintainable, and scalable architecture.
-
-### High-Level System Architecture
-
-The system consists of three primary components: the central API, a persistent database, and an external AI service. The client interacts exclusively with the API, which orchestrates all internal logic and external calls.
-
-<img width="1024" height="1024" alt="perfect1" src="https://github.com/user-attachments/assets/bcfdc5e0-2db5-464c-9419-53d3b375dabb" />
-
-
-### Internal Application Architecture
-
-The application's internal structure follows a classic **Layered Architecture**, a core design principle for building robust backend services. This separates the code into distinct layers (Controller, Service, Repository), each with a specific responsibility.
-
-
-![perfect2 png](https://github.com/user-attachments/assets/3b777b7b-6a23-4cd5-a675-ff29f5a13a3d)
-
----
-
 ## Tech Stack & Tools
 
 - **Backend:** Java 17+, Spring Boot (Spring Web, Spring Data JPA), Thymeleaf, Google Gemini API, Apache PDFBox
@@ -51,75 +30,128 @@ The application's internal structure follows a classic **Layered Architecture**,
 - **Tools & Environment:** Git & GitHub, Postman, IntelliJ IDEA
 
 ---
----
+## Architecture
 
-## ⚙️ Core Workflow: The Screening Process
+The application is designed with a clean, maintainable, and scalable architecture.
 
-The following flowchart illustrates the step-by-step process that occurs when a user requests a new resume screening.
+### High-Level System Architecture
 
-```mermaid
-graph TD
-    A["👤 Client (Postman/UI)"] --> B["/:api/screen Endpoint"];
-    B --> C["ScreeningService"];
-    C -- "1. Fetches Resume & JD" --> D["💾 MySQL Database"];
-    C -- "2. Calls AI Service" --> E["LLMService"];
-    E -- "3. Sends Prompt via HTTPS" --> F["🧠 Google Gemini API"];
-    F -- "4. Returns JSON Response" --> E;
-    E -- "5. Parses & Cleans Result" --> C;
-    C -- "6. Saves Result to DB" --> D;
-    B -- "7. Returns 200 OK to Client" --> A;
-
-    style A fill:#bb86fc,stroke:#333,stroke-width:2px,color:#121212
-    style F fill:#f4b400,stroke:#333,stroke-width:2px,color:#121212
-    style D fill:#4479A1,stroke:#333,stroke-width:2px,color:#fff
-```
----
-
----
-
-## 🎯 User-Flow
-
-This project empowers users through distinct workflows, primarily focusing on the HR Manager, with a vision for future expansion to Job Seekers.
-
-### HR Manager Workflow (Current Implementation)
-
-The core functionality of the Smart Resume Screener is designed to streamline the recruitment process for HR professionals.
+The system consists of three primary components: the central API, a persistent database, and an external AI service. The client interacts exclusively with the API, which orchestrates all internal logic and external calls.
 
 ```mermaid
-graph TD
-    subgraph "HR Manager"
-        A[Start: Access Dashboard] -- "1. Define Open Role" --> B(Create Job);
-        B -- "2. Upload Candidates" --> C(Upload Resume);
-        C -- "3. Initiate Screening" --> D(Analyze Resume);
-        D -- "4. View Best Matches" --> E(View Shortlist for Job);
-        E -- "5. Maintain Data" --> F{Delete Job/Resume};
+graph LR
+    subgraph "User Interaction"
+        direction TB
+        Client["Client<br>(Thymeleaf UI / Postman)"];
     end
 
-    style A fill:#bb86fc,stroke:#333,stroke-width:2px,color:#121212
-    style B fill:#f4b400,stroke:#333,stroke-width:2px,color:#121212
-    style C fill:#f4b400,stroke:#333,stroke-width:2px,color:#121212
-    style D fill:#f4b400,stroke:#333,stroke-width:2px,color:#121212
-    style E fill:#f4b400,stroke:#333,stroke-width:2px,color:#121212
-    style F fill:#f4b400,stroke:#333,stroke-width:2px,color:#121212
-```
-### Future: Job Seeker Self-Check Workflow (Conceptual)
-Imagine extending this tool to empower job seekers. They could gain immediate insights into their resume's alignment with a desired role.
-
-```mermaid
-graph TD
-    subgraph "Job Seeker (Future Feature)"
-        G[Start: Access Public Tool] -- "1. Paste Job Description" --> H(Input JD Text);
-        H -- "2. Upload Own Resume" --> I(Upload Resume File);
-        I -- "3. Get Instant Feedback" --> J(Analyze & View Personal Score);
-        J -- "4. Refine & Improve" --> K(End: Improve Resume);
+    subgraph "My Application"
+        direction TB
+        Backend["Smart Resume Screener API<br>(Spring Boot)"];
     end
 
-    style G fill:#bb86fc,stroke:#333,stroke-width:2px,color:#121212
-    style H fill:#3f51b5,stroke:#333,stroke-width:2px,color:#fff
-    style I fill:#3f51b5,stroke:#333,stroke-width:2px,color:#fff
-    style J fill:#3f51b5,stroke:#333,stroke-width:2px,color:#fff
-    style K fill:#3f51b5,stroke:#333,stroke-width:2px,color:#fff
+    subgraph "External Services"
+        direction TB
+        Database[("MySQL Database")];
+        Gemini(("Google Gemini API"));
+    end
+
+    Client -- "1. Sends HTTPS Requests" --> Backend;
+    Backend -- "2. Reads/Writes Data (JDBC)" --> Database;
+    Backend -- "3. Sends Prompt for Analysis (HTTPS)" --> Gemini;
+
+    style Client fill:#bb86fc,stroke:#333,stroke-width:2px,color:#121212
+    style Gemini fill:#f4b400,stroke:#333,stroke-width:2px,color:#121212
+    style Database fill:#4479A1,stroke:#333,stroke-width:2px,color:#fff
 ```
+
+### Internal Application Architecture
+
+The application's internal structure follows a classic **Layered Architecture**, a core design principle for building robust backend services. This separates the code into distinct layers (Controller, Service, Repository), each with a specific responsibility.
+
+
+```mermaid
+sequenceDiagram
+    actor Client
+    participant ScreeningController
+    participant ScreeningService
+    participant LLMService
+    participant MySQL_Database as 💾 Database
+    participant Gemini_API as 🧠 Google Gemini API
+
+    Client->>ScreeningController: POST /api/screen (IDs)
+    activate ScreeningController
+
+    ScreeningController->>ScreeningService: screenResume(resumeId, jobId)
+    activate ScreeningService
+
+    ScreeningService->>MySQL_Database: findById(resumeId)
+    MySQL_Database-->>ScreeningService: Resume Data
+
+    ScreeningService->>MySQL_Database: findById(jobId)
+    MySQL_Database-->>ScreeningService: Job Description Data
+
+    ScreeningService->>LLMService: scoreResume(texts)
+    activate LLMService
+
+    LLMService->>Gemini_API: HTTPS POST Request (Prompt)
+    activate Gemini_API
+    Gemini_API-->>LLMService: JSON Response
+    deactivate Gemini_API
+
+    LLMService-->>ScreeningService: Parsed ScreeningResult
+    deactivate LLMService
+
+    ScreeningService->>MySQL_Database: save(ScreeningResult)
+    MySQL_Database-->>ScreeningService: Confirms Save
+
+    ScreeningService-->>ScreeningController: Returns Saved Result
+    deactivate ScreeningService
+
+    ScreeningController-->>Client: 200 OK Response (JSON)
+    deactivate ScreeningController
+```
+
+---
+
+## 🚀 API Usage Workflow
+
+This application provides a powerful set of decoupled API endpoints. To get the most out of the system, these endpoints are designed to be called in a logical sequence to perform a complete screening task.
+
+The following flowchart illustrates the standard end-to-end workflow. It serves as a quickstart guide for a user to go from creating a job and uploading a resume to seeing the final, AI-powered screening results. This sequential process ensures that all necessary data is persisted before the analysis is performed.
+```mermaid
+graph TD
+    A(Start: Prepare JD & Resume);
+    B["<b>1. Create Job</b><br/>POST /api/jobs"];
+    C["<b>2. Upload Resume</b><br/>POST /api/resumes/upload"];
+    D["<b>3. Run Analysis</b><br/>POST /api/screen"];
+    E["<b>4. View Shortlist</b><br/>GET /api/jobs/{jobId}/shortlist"];
+    F(End: Identify Top Candidates);
+
+    A --> B;
+    B -- "Take note of 'jobId' from response" --> C;
+    C -- "Take note of 'resumeId' from response" --> D;
+    D -- "Use 'jobId' & 'resumeId' in request body" --> E;
+    E -- "Review AI-generated scores and justifications" --> F;
+
+    style A fill:#bb86fc,stroke:#333,stroke-width:2px,color:#121212
+    style F fill:#bb86fc,stroke:#333,stroke-width:2px,color:#121212
+```
+---
+
+## API Documentation
+
+| Method | Endpoint | Description | Request Body Example |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/jobs` | Creates a new job description. | `{"jobTitle": "...", "content": "..."}` |
+| `GET` | `/api/jobs` | Retrieves a list of all jobs. | (None) |
+| `DELETE` | `/api/jobs/{id}` | Deletes a job by its ID. | (None) |
+| `POST` | `/api/resumes/upload` | Uploads a candidate's resume. | `form-data` with `name` (text) and `file` (file) keys. |
+| `GET` | `/api/resumes` | Retrieves a list of all resumes. | (None) |
+| `DELETE` | `/api/resumes/{id}` | Deletes a resume by its ID. | (None) |
+| `POST` | `/api/screen` | Scores a resume against a job. | `{"resumeId": 1, "jobId": 1}` |
+| `GET` | `/api/jobs/{jobId}/shortlist`| Gets all scored candidates for a job. | (None) |
+
 ---
 
 ## Setup and Installation
@@ -153,20 +185,7 @@ To run this project locally, please follow these steps:
     ```
     - The application dashboard will be available at `http://localhost:8080`.
 
----
 
-## API Documentation
-
-| Method | Endpoint | Description | Request Body Example |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/jobs` | Creates a new job description. | `{"jobTitle": "...", "content": "..."}` |
-| `GET` | `/api/jobs` | Retrieves a list of all jobs. | (None) |
-| `DELETE` | `/api/jobs/{id}` | Deletes a job by its ID. | (None) |
-| `POST` | `/api/resumes/upload` | Uploads a candidate's resume. | `form-data` with `name` (text) and `file` (file) keys. |
-| `GET` | `/api/resumes` | Retrieves a list of all resumes. | (None) |
-| `DELETE` | `/api/resumes/{id}` | Deletes a resume by its ID. | (None) |
-| `POST` | `/api/screen` | Scores a resume against a job. | `{"resumeId": 1, "jobId": 1}` |
-| `GET` | `/api/jobs/{jobId}/shortlist`| Gets all scored candidates for a job. | (None) |
 
 ---
 
