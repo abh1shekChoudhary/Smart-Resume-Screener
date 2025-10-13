@@ -13,6 +13,16 @@ This project demonstrates a modern, API-driven approach to solving a real-world 
 
 ---
 
+## Key Features
+
+- **Multi-Format Resume Parsing:** Accepts and extracts text from both **PDF** and plain text (`.txt`) resume files.
+- **AI-Powered Analysis:** Utilizes the Google Gemini API to perform a semantic analysis of a resume against a job description.
+- **Structured Data Extraction:** Extracts a quantifiable **match score** (1-10), a detailed **justification**, and a list of **relevant skills**.
+- **Full CRUD Functionality:** Provides a complete RESTful API for Creating, Reading, and **Deleting** jobs and resumes.
+- **Interactive Web Dashboard:** Includes an optional, server-rendered frontend built with **Thymeleaf** for easy interaction with the API.
+
+---
+
 ## Architecture
 
 The application is designed with a clean, maintainable, and scalable architecture.
@@ -21,21 +31,21 @@ The application is designed with a clean, maintainable, and scalable architectur
 
 The system consists of three primary components: the central API, a persistent database, and an external AI service. The client interacts exclusively with the API, which orchestrates all internal logic and external calls.
 
+<img width="1024" height="1024" alt="perfect1" src="https://github.com/user-attachments/assets/bcfdc5e0-2db5-464c-9419-53d3b375dabb" />
 
-*Replace this line with your first diagram.*
 
 ### Internal Application Architecture
 
-The application's internal structure follows a classic **Layered Architecture**, a core design principle for building robust backend services. This separates the code into distinct layers, each with a specific responsibility, ensuring a clean separation of concerns.
+The application's internal structure follows a classic **Layered Architecture**, a core design principle for building robust backend services. This separates the code into distinct layers (Controller, Service, Repository), each with a specific responsibility.
 
 
-*Replace this line with your second diagram.*
+![perfect2 png](https://github.com/user-attachments/assets/3b777b7b-6a23-4cd5-a675-ff29f5a13a3d)
 
 ---
 
 ## Tech Stack & Tools
 
-- **Backend:** Java 17+, Spring Boot (Spring Web, Spring Data JPA), Google Gemini API, Apache PDFBox
+- **Backend:** Java 17+, Spring Boot (Spring Web, Spring Data JPA), Thymeleaf, Google Gemini API, Apache PDFBox
 - **Database:** MySQL
 - **Build & Dependencies:** Maven, Lombok, Jackson
 - **Tools & Environment:** Git & GitHub, Postman, IntelliJ IDEA
@@ -71,18 +81,22 @@ To run this project locally, please follow these steps:
     ```bash
     mvn spring-boot:run
     ```
-    - The API will be available at `http://localhost:8080`.
+    - The application dashboard will be available at `http://localhost:8080`.
 
 ---
 
 ## API Documentation
 
-| Method | Endpoint                    | Description                           | Request Body Example                                     |
-| :----- | :-------------------------- | :------------------------------------ | :------------------------------------------------------- |
-| `POST` | `/api/jobs`                 | Creates a new job description.        | `{"jobTitle": "...", "content": "..."}`                  |
-| `POST` | `/api/resumes/upload`       | Uploads a candidate's resume.         | `form-data` with `name` (text) and `file` (file) keys.   |
-| `POST` | `/api/screen`               | Scores a resume against a job.        | `{"resumeId": 1, "jobId": 1}`                            |
-| `GET`  | `/api/jobs/{jobId}/shortlist` | Gets all scored candidates for a job. | (None)                                                   |
+| Method | Endpoint | Description | Request Body Example |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/jobs` | Creates a new job description. | `{"jobTitle": "...", "content": "..."}` |
+| `GET` | `/api/jobs` | Retrieves a list of all jobs. | (None) |
+| `DELETE` | `/api/jobs/{id}` | Deletes a job by its ID. | (None) |
+| `POST` | `/api/resumes/upload` | Uploads a candidate's resume. | `form-data` with `name` (text) and `file` (file) keys. |
+| `GET` | `/api/resumes` | Retrieves a list of all resumes. | (None) |
+| `DELETE` | `/api/resumes/{id}` | Deletes a resume by its ID. | (None) |
+| `POST` | `/api/screen` | Scores a resume against a job. | `{"resumeId": 1, "jobId": 1}` |
+| `GET` | `/api/jobs/{jobId}/shortlist`| Gets all scored candidates for a job. | (None) |
 
 ---
 
@@ -99,7 +113,6 @@ The prompt is structured to guide the model's behavior and output format.
 - **Clear Task Definition:** The task is unambiguously defined: compare texts, rate on a specific scale, provide a justification, and extract relevant skills.
 
 **Prompt Used:**
-
 Compare the following resume with this job description. Your task is to:
 
 Rate the fit on a scale of 1-10.
